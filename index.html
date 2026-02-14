@@ -1,0 +1,1197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Japanese Learning - Subtitle Study with Save Feature</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Hiragino Kaku Gothic Pro', 'Meiryo', sans-serif;
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .upload-section {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+        }
+
+        .upload-section h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .file-input-wrapper input[type="file"] {
+            position: absolute;
+            left: -9999px;
+            opacity: 0;
+        }
+
+        .file-label {
+            display: inline-block;
+            padding: 15px 40px;
+            background: #3498db;
+            color: white;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+            font-size: 1.1em;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .file-label:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0,0,0,0.15);
+        }
+
+        .file-info {
+            text-align: center;
+            margin-top: 15px;
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .saved-subtitles-section {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .saved-subtitles-section h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .saved-subtitles-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+            padding: 10px;
+        }
+
+        .saved-subtitle-card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+            position: relative;
+        }
+
+        .saved-subtitle-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            border-color: #3498db;
+        }
+
+        .saved-subtitle-card h4 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+            padding-right: 30px;
+        }
+
+        .saved-subtitle-card .subtitle-meta {
+            font-size: 0.85em;
+            color: #7f8c8d;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .delete-saved {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .saved-subtitle-card:hover .delete-saved {
+            opacity: 1;
+        }
+
+        .delete-saved:hover {
+            background: #c0392b;
+        }
+
+        .subtitle-container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .subtitle-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .subtitle-header h2 {
+            color: #2c3e50;
+        }
+
+        .subtitle-controls {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .control-btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s;
+        }
+
+        .control-btn.prev {
+            background: #3498db;
+            color: white;
+        }
+
+        .control-btn.next {
+            background: #2ecc71;
+            color: white;
+        }
+
+        .control-btn.random {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .control-btn.save {
+            background: #f39c12;
+            color: white;
+        }
+
+        .control-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .subtitle-display {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 40px;
+            margin-bottom: 20px;
+            border: 2px solid #3498db;
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .japanese-text {
+            font-size: 2.8em;
+            line-height: 1.6;
+            color: #2c3e50;
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 20px;
+            word-wrap: break-word;
+        }
+
+        .timestamp {
+            text-align: center;
+            color: #7f8c8d;
+            font-size: 1.1em;
+            font-family: monospace;
+        }
+
+        .progress-indicator {
+            text-align: center;
+            margin: 20px 0;
+            font-size: 1.2em;
+            color: #34495e;
+            font-weight: bold;
+        }
+
+        .subtitle-list {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        .subtitle-item {
+            padding: 15px;
+            border-bottom: 1px solid #e0e0e0;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .subtitle-item:last-child {
+            border-bottom: none;
+        }
+
+        .subtitle-item:hover {
+            background: #f0f7ff;
+        }
+
+        .subtitle-item.active {
+            background: #3498db;
+            color: white;
+        }
+
+        .subtitle-item .subtitle-text {
+            flex: 1;
+            margin-right: 15px;
+        }
+
+        .subtitle-item .subtitle-time {
+            font-family: monospace;
+            color: #7f8c8d;
+            font-size: 0.9em;
+        }
+
+        .subtitle-item.active .subtitle-time {
+            color: white;
+        }
+
+        .study-tools {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .study-tools h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+
+        .tool-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .tool-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.95em;
+            transition: all 0.3s;
+            background: #95a5a6;
+            color: white;
+        }
+
+        .tool-btn:hover {
+            background: #7f8c8d;
+            transform: translateY(-2px);
+        }
+
+        .tool-btn.active {
+            background: #2ecc71;
+        }
+
+        .vocabulary-panel, .translation-panel, .notes-panel {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+            display: none;
+            border: 1px solid #e0e0e0;
+        }
+
+        .vocabulary-panel.show, .translation-panel.show, .notes-panel.show {
+            display: block;
+        }
+
+        .vocab-item {
+            padding: 10px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .vocab-item:hover {
+            background: #f0f7ff;
+        }
+
+        .vocab-item:last-child {
+            border-bottom: none;
+        }
+
+        .vocab-word {
+            font-weight: bold;
+            color: #e74c3c;
+            font-size: 1.2em;
+            min-width: 100px;
+        }
+
+        .vocab-context {
+            color: #7f8c8d;
+            font-style: italic;
+        }
+
+        .notes-textarea {
+            width: 100%;
+            min-height: 100px;
+            padding: 10px;
+            border: 1px solid #e0e0e0;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            font-family: inherit;
+            resize: vertical;
+        }
+
+        .save-notes-btn {
+            background: #2ecc71;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .save-notes-btn:hover {
+            background: #27ae60;
+        }
+
+        .no-subtitles {
+            text-align: center;
+            color: #95a5a6;
+            padding: 40px;
+            font-size: 1.2em;
+        }
+
+        .message {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: bold;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .save-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-left: 5px;
+        }
+
+        .save-indicator.saved {
+            background: #2ecc71;
+            box-shadow: 0 0 10px #2ecc71;
+        }
+
+        .save-name-input {
+            padding: 8px;
+            border: 1px solid #e0e0e0;
+            border-radius: 5px;
+            margin-right: 10px;
+            width: 200px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .modal-content h3 {
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+
+        .modal-content input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #e0e0e0;
+            border-radius: 5px;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .modal-buttons button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .modal-buttons .confirm {
+            background: #2ecc71;
+            color: white;
+        }
+
+        .modal-buttons .cancel {
+            background: #95a5a6;
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .japanese-text {
+                font-size: 1.8em;
+            }
+            
+            .subtitle-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .subtitle-controls {
+                justify-content: center;
+            }
+
+            .saved-subtitles-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📖 Japanese Subtitle Study with Save</h1>
+            <p>Upload, browse, and save your favorite subtitles for later study</p>
+        </header>
+
+        <div id="messageArea" class="message" style="display: none;"></div>
+
+        <div class="upload-section">
+            <h2>📤 Upload New Subtitle File</h2>
+            <div class="file-input-wrapper">
+                <input type="file" id="subtitleFile" accept=".srt,.vtt,.ass,.txt,.sub">
+                <label for="subtitleFile" class="file-label">Choose Subtitle File</label>
+            </div>
+            <div class="file-info">
+                <p>Supported formats: .srt, .vtt, .ass, .txt, .sub</p>
+                <p id="fileName"></p>
+            </div>
+        </div>
+
+        <div class="saved-subtitles-section" id="savedSection">
+            <h2>💾 Saved Subtitles</h2>
+            <div class="saved-subtitles-grid" id="savedSubtitlesGrid">
+                <!-- Saved subtitles will appear here -->
+            </div>
+        </div>
+
+        <div class="subtitle-container" id="subtitleContainer" style="display: none;">
+            <div class="subtitle-header">
+                <h2>🎯 Current Subtitle</h2>
+                <div class="subtitle-controls">
+                    <button class="control-btn prev" id="prevBtn" title="Previous subtitle">◀ Previous</button>
+                    <button class="control-btn next" id="nextBtn" title="Next subtitle">Next ▶</button>
+                    <button class="control-btn random" id="randomBtn" title="Random subtitle">🎲 Random</button>
+                    <button class="control-btn save" id="saveBtn" title="Save current subtitle">💾 Save</button>
+                </div>
+            </div>
+
+            <div class="subtitle-display" id="currentSubtitle">
+                <div class="japanese-text" id="japaneseText">-</div>
+                <div class="timestamp" id="timestamp">00:00:00 - 00:00:00</div>
+            </div>
+
+            <div class="progress-indicator" id="progress">
+                Subtitle <span id="currentIndex">1</span> of <span id="totalSubtitles">0</span>
+            </div>
+
+            <div class="study-tools">
+                <h3>📚 Study Tools</h3>
+                <div class="tool-buttons">
+                    <button class="tool-btn" id="vocabBtn">📖 Extract Vocabulary</button>
+                    <button class="tool-btn" id="translationBtn">🌐 Translation Mode</button>
+                    <button class="tool-btn" id="readingBtn">🔤 Reading Practice</button>
+                    <button class="tool-btn" id="notesBtn">📝 Add Notes</button>
+                </div>
+                
+                <div class="vocabulary-panel" id="vocabularyPanel">
+                    <h4>Vocabulary from Current Subtitle</h4>
+                    <div id="vocabularyList"></div>
+                </div>
+
+                <div class="translation-panel" id="translationPanel">
+                    <h4>Quick Translation</h4>
+                    <p id="translationText">Click on vocabulary words to search on Jisho.org</p>
+                </div>
+
+                <div class="notes-panel" id="notesPanel">
+                    <h4>Study Notes</h4>
+                    <textarea class="notes-textarea" id="notesText" placeholder="Add your notes about this subtitle..."></textarea>
+                    <button class="save-notes-btn" id="saveNotesBtn">Save Notes</button>
+                </div>
+            </div>
+
+            <div class="subtitle-list">
+                <h3>📋 All Subtitles</h3>
+                <div id="subtitleItems">
+                    <!-- Subtitle items will be added here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Save Modal -->
+    <div class="modal" id="saveModal">
+        <div class="modal-content">
+            <h3>💾 Save Subtitle</h3>
+            <input type="text" id="saveName" placeholder="Enter a name for this subtitle" value="">
+            <div class="modal-buttons">
+                <button class="confirm" id="confirmSave">Save</button>
+                <button class="cancel" id="cancelSave">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Application state
+        let subtitles = [];
+        let currentIndex = 0;
+        let translationMode = false;
+        let readingPractice = false;
+        let savedSubtitles = [];
+        let currentFileName = '';
+
+        // DOM elements
+        const subtitleFile = document.getElementById('subtitleFile');
+        const messageArea = document.getElementById('messageArea');
+        const subtitleContainer = document.getElementById('subtitleContainer');
+        const fileName = document.getElementById('fileName');
+        const japaneseText = document.getElementById('japaneseText');
+        const timestamp = document.getElementById('timestamp');
+        const currentIndexSpan = document.getElementById('currentIndex');
+        const totalSubtitlesSpan = document.getElementById('totalSubtitles');
+        const subtitleItems = document.getElementById('subtitleItems');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const randomBtn = document.getElementById('randomBtn');
+        const saveBtn = document.getElementById('saveBtn');
+        const vocabBtn = document.getElementById('vocabBtn');
+        const translationBtn = document.getElementById('translationBtn');
+        const readingBtn = document.getElementById('readingBtn');
+        const notesBtn = document.getElementById('notesBtn');
+        const vocabularyPanel = document.getElementById('vocabularyPanel');
+        const translationPanel = document.getElementById('translationPanel');
+        const notesPanel = document.getElementById('notesPanel');
+        const vocabularyList = document.getElementById('vocabularyList');
+        const translationText = document.getElementById('translationText');
+        const notesText = document.getElementById('notesText');
+        const saveNotesBtn = document.getElementById('saveNotesBtn');
+        const savedSubtitlesGrid = document.getElementById('savedSubtitlesGrid');
+        const saveModal = document.getElementById('saveModal');
+        const saveName = document.getElementById('saveName');
+        const confirmSave = document.getElementById('confirmSave');
+        const cancelSave = document.getElementById('cancelSave');
+
+        // Load saved subtitles from localStorage
+        function loadSavedSubtitles() {
+            const saved = localStorage.getItem('japaneseSubtitles');
+            if (saved) {
+                try {
+                    savedSubtitles = JSON.parse(saved);
+                    renderSavedSubtitles();
+                } catch (e) {
+                    console.error('Error loading saved subtitles:', e);
+                    savedSubtitles = [];
+                }
+            }
+        }
+
+        // Save subtitles to localStorage
+        function saveToLocalStorage() {
+            try {
+                localStorage.setItem('japaneseSubtitles', JSON.stringify(savedSubtitles));
+                showMessage('💾 Subtitles saved to browser storage!', 'success');
+            } catch (e) {
+                showMessage('Error saving to storage', 'error');
+            }
+        }
+
+        // Render saved subtitles grid
+        function renderSavedSubtitles() {
+            if (savedSubtitles.length === 0) {
+                savedSubtitlesGrid.innerHTML = '<div class="no-subtitles">No saved subtitles yet. Save some to study later!</div>';
+                return;
+            }
+
+            savedSubtitlesGrid.innerHTML = savedSubtitles.map((item, index) => `
+                <div class="saved-subtitle-card" data-index="${index}">
+                    <h4>${item.name}</h4>
+                    <div class="subtitle-meta">
+                        <span>📝 ${item.subtitleCount} lines</span>
+                        <span>📅 ${new Date(item.date).toLocaleDateString()}</span>
+                    </div>
+                    <div class="subtitle-meta" style="margin-top: 5px;">
+                        <span>💬 ${item.textPreview}</span>
+                    </div>
+                    <button class="delete-saved" onclick="event.stopPropagation(); deleteSavedSubtitle(${index})">✕</button>
+                </div>
+            `).join('');
+
+            // Add click handlers
+            document.querySelectorAll('.saved-subtitle-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    const index = card.dataset.index;
+                    loadSavedSubtitle(parseInt(index));
+                });
+            });
+        }
+
+        // Delete saved subtitle
+        window.deleteSavedSubtitle = function(index) {
+            if (confirm('Delete this saved subtitle?')) {
+                savedSubtitles.splice(index, 1);
+                saveToLocalStorage();
+                renderSavedSubtitles();
+                showMessage('Subtitle deleted', 'info');
+            }
+        };
+
+        // Load saved subtitle
+        function loadSavedSubtitle(index) {
+            const saved = savedSubtitles[index];
+            if (saved && saved.data) {
+                subtitles = saved.data;
+                currentIndex = 0;
+                currentFileName = saved.name;
+                fileName.textContent = `📄 ${saved.name} (Loaded from saved)`;
+                totalSubtitlesSpan.textContent = subtitles.length;
+                
+                renderSubtitleList();
+                updateDisplay();
+                
+                subtitleContainer.style.display = 'block';
+                showMessage(`✅ Loaded saved subtitle: ${saved.name}`, 'success');
+            }
+        }
+
+        // Show message function
+        function showMessage(text, type = 'success') {
+            messageArea.textContent = text;
+            messageArea.className = `message ${type}`;
+            messageArea.style.display = 'block';
+            
+            setTimeout(() => {
+                messageArea.style.display = 'none';
+            }, 3000);
+        }
+
+        // Convert time string to seconds
+        function timeToSeconds(timeStr) {
+            const parts = timeStr.split(/[:,]/);
+            if (parts.length === 4) { // HH:MM:SS,mmm
+                return parseInt(parts[0]) * 3600 + parseInt(parts[1]) * 60 + parseInt(parts[2]) + parseInt(parts[3]) / 1000;
+            } else if (parts.length === 3) { // MM:SS or HH:MM:SS
+                if (timeStr.includes(':')) {
+                    const timeParts = timeStr.split(':');
+                    if (timeParts.length === 3) {
+                        return parseInt(timeParts[0]) * 3600 + parseInt(timeParts[1]) * 60 + parseInt(timeParts[2]);
+                    } else {
+                        return parseInt(timeParts[0]) * 60 + parseInt(timeParts[1]);
+                    }
+                }
+            }
+            return 0;
+        }
+
+        // Format seconds to time string
+        function secondsToTime(seconds) {
+            const hours = Math.floor(seconds / 3600);
+            const minutes = Math.floor((seconds % 3600) / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        // Parse SRT subtitle
+        function parseSRT(content) {
+            const subtitles = [];
+            const blocks = content.trim().split(/\n\s*\n/);
+            
+            blocks.forEach(block => {
+                const lines = block.split('\n');
+                if (lines.length >= 3) {
+                    // Find the time line (contains -->)
+                    let timeLineIndex = -1;
+                    for (let i = 0; i < lines.length; i++) {
+                        if (lines[i].includes('-->')) {
+                            timeLineIndex = i;
+                            break;
+                        }
+                    }
+                    
+                    if (timeLineIndex !== -1) {
+                        const timeLine = lines[timeLineIndex];
+                        const text = lines.slice(timeLineIndex + 1).join(' ').trim();
+                        
+                        const timeMatch = timeLine.match(/(\d{2}:\d{2}:\d{2}[,.]\d{3})\s*-->\s*(\d{2}:\d{2}:\d{2}[,.]\d{3})/);
+                        if (timeMatch) {
+                            subtitles.push({
+                                start: timeToSeconds(timeMatch[1]),
+                                end: timeToSeconds(timeMatch[2]),
+                                text: text
+                            });
+                        }
+                    }
+                }
+            });
+            
+            return subtitles;
+        }
+
+        // Parse simple text subtitle (each line is a subtitle)
+        function parseSimpleText(content) {
+            const subtitles = [];
+            const lines = content.split('\n').filter(line => line.trim() !== '');
+            
+            lines.forEach((line, index) => {
+                // Try to detect timestamp at beginning [00:00] or (00:00)
+                const timestampMatch = line.match(/[\(\[](\d{1,2}:\d{2}(?::\d{2})?)[\)\]]\s*(.+)/);
+                
+                if (timestampMatch) {
+                    subtitles.push({
+                        start: timeToSeconds(timestampMatch[1] + ':00'),
+                        end: timeToSeconds(timestampMatch[1] + ':05'),
+                        text: timestampMatch[2].trim()
+                    });
+                } else {
+                    // If no timestamp, create approximate timings
+                    subtitles.push({
+                        start: index * 5,
+                        end: (index + 1) * 5,
+                        text: line.trim()
+                    });
+                }
+            });
+            
+            return subtitles;
+        }
+
+        // Parse subtitle file based on extension
+        function parseSubtitle(content, filename) {
+            const extension = filename.split('.').pop().toLowerCase();
+            
+            switch(extension) {
+                case 'srt':
+                case 'ass':
+                case 'sub':
+                    return parseSRT(content);
+                case 'vtt':
+                    return parseSRT(content.replace(/\./g, ',')); // VTT uses . instead of ,
+                case 'txt':
+                default:
+                    return parseSimpleText(content);
+            }
+        }
+
+        // Extract Japanese words (simplified)
+        function extractJapaneseWords(text) {
+            // Match Japanese characters (Hiragana, Katakana, Kanji)
+            const japaneseRegex = /[\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff]+/g;
+            const matches = text.match(japaneseRegex) || [];
+            
+            // Remove duplicates and return
+            return [...new Set(matches)];
+        }
+
+        // Update current subtitle display
+        function updateDisplay() {
+            if (subtitles.length === 0) return;
+            
+            const subtitle = subtitles[currentIndex];
+            
+            // Format text for display
+            let displayText = subtitle.text;
+            
+            // Add reading practice formatting if enabled
+            if (readingPractice) {
+                // Add furigana-like format (simplified)
+                displayText = displayText.replace(/([\u4e00-\u9fff]+)/g, '<ruby>$1<rt>($1)</rt></ruby>');
+            }
+            
+            japaneseText.innerHTML = displayText;
+            timestamp.textContent = `${secondsToTime(subtitle.start)} - ${secondsToTime(subtitle.end)}`;
+            currentIndexSpan.textContent = currentIndex + 1;
+            
+            // Update active item in list
+            document.querySelectorAll('.subtitle-item').forEach((item, index) => {
+                if (index === currentIndex) {
+                    item.classList.add('active');
+                    item.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                } else {
+                    item.classList.remove('active');
+                }
+            });
+
+            // Update vocabulary panel if open
+            if (vocabularyPanel.classList.contains('show')) {
+                extractAndShowVocabulary();
+            }
+        }
+
+        // Render subtitle list
+        function renderSubtitleList() {
+            subtitleItems.innerHTML = '';
+            
+            subtitles.forEach((sub, index) => {
+                const item = document.createElement('div');
+                item.className = 'subtitle-item';
+                if (index === currentIndex) {
+                    item.classList.add('active');
+                }
+                
+                const previewText = sub.text.length > 50 ? sub.text.substring(0, 50) + '...' : sub.text;
+                
+                item.innerHTML = `
+                    <span class="subtitle-text">${previewText}</span>
+                    <span class="subtitle-time">${secondsToTime(sub.start)}</span>
+                `;
+                
+                item.addEventListener('click', () => {
+                    currentIndex = index;
+                    updateDisplay();
+                });
+                
+                subtitleItems.appendChild(item);
+            });
+        }
+
+        // Extract and show vocabulary
+        function extractAndShowVocabulary() {
+            if (subtitles.length === 0) return;
+            
+            const currentText = subtitles[currentIndex].text;
+            const words = extractJapaneseWords(currentText);
+            
+            if (words.length > 0) {
+                vocabularyList.innerHTML = words.map(word => `
+                    <div class="vocab-item">
+                        <span class="vocab-word">${word}</span>
+                        <span class="vocab-context">(Click to search)</span>
+                    </div>
+                `).join('');
+
+                // Add click handlers
+                document.querySelectorAll('.vocab-item').forEach(item => {
+                    item.addEventListener('click', () => {
+                        const word = item.querySelector('.vocab-word').textContent;
+                        window.open(`https://jisho.org/search/${encodeURIComponent(word)}`, '_blank');
+                    });
+                });
+            } else {
+                vocabularyList.innerHTML = '<p>No Japanese words found in this subtitle</p>';
+            }
+        }
+
+        // Save current subtitle
+        function saveCurrentSubtitle(name) {
+            if (subtitles.length === 0) return;
+            
+            const preview = subtitles[0].text.substring(0, 50) + (subtitles[0].text.length > 50 ? '...' : '');
+            
+            const savedItem = {
+                id: Date.now(),
+                name: name || `Subtitle ${savedSubtitles.length + 1}`,
+                date: new Date().toISOString(),
+                subtitleCount: subtitles.length,
+                textPreview: preview,
+                data: subtitles.map(sub => ({ ...sub })) // Copy subtitles
+            };
+            
+            savedSubtitles.push(savedItem);
+            saveToLocalStorage();
+            renderSavedSubtitles();
+            showMessage(`✅ Subtitle saved as "${savedItem.name}"`);
+        }
+
+        // Event Listeners
+        subtitleFile.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            currentFileName = file.name;
+            fileName.textContent = `📄 ${file.name}`;
+            
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    subtitles = parseSubtitle(e.target.result, file.name);
+                    
+                    if (subtitles.length > 0) {
+                        currentIndex = 0;
+                        totalSubtitlesSpan.textContent = subtitles.length;
+                        
+                        renderSubtitleList();
+                        updateDisplay();
+                        
+                        subtitleContainer.style.display = 'block';
+                        showMessage(`✅ Loaded ${subtitles.length} subtitles successfully!`);
+                    } else {
+                        showMessage('❌ No subtitles found in file', 'error');
+                    }
+                } catch (error) {
+                    console.error(error);
+                    showMessage('❌ Error parsing subtitle file', 'error');
+                }
+            };
+            
+            reader.readAsText(file);
+        });
+
+        // Navigation
+        prevBtn.addEventListener('click', () => {
+            if (subtitles.length === 0) return;
+            currentIndex = (currentIndex - 1 + subtitles.length) % subtitles.length;
+            updateDisplay();
+        });
+
+        nextBtn.addEventListener('click', () => {
+            if (subtitles.length === 0) return;
+            currentIndex = (currentIndex + 1) % subtitles.length;
+            updateDisplay();
+        });
+
+        randomBtn.addEventListener('click', () => {
+            if (subtitles.length === 0) return;
+            currentIndex = Math.floor(Math.random() * subtitles.length);
+            updateDisplay();
+        });
+
+        // Save button
+        saveBtn.addEventListener('click', () => {
+            if (subtitles.length === 0) return;
+            
+            // Suggest a name based on current file or first subtitle
+            const suggestedName = currentFileName ? 
+                currentFileName.replace(/\.[^/.]+$/, "") : 
+                `Subtitle ${savedSubtitles.length + 1}`;
+            
+            saveName.value = suggestedName;
+            saveModal.classList.add('show');
+        });
+
+        confirmSave.addEventListener('click', () => {
+            const name = saveName.value.trim();
+            if (name) {
+                saveCurrentSubtitle(name);
+                saveModal.classList.remove('show');
+                saveName.value = '';
+            } else {
+                showMessage('Please enter a name', 'error');
+            }
+        });
+
+        cancelSave.addEventListener('click', () => {
+            saveModal.classList.remove('show');
+            saveName.value = '';
+        });
+
+        // Close modal when clicking outside
+        window.addEventListener('click', (e) => {
+            if (e.target === saveModal) {
+                saveModal.classList.remove('show');
+            }
+        });
+
+        // Study tools
+        vocabBtn.addEventListener('click', () => {
+            vocabularyPanel.classList.toggle('show');
+            vocabBtn.classList.toggle('active');
+            
+            if (vocabularyPanel.classList.contains('show')) {
+                extractAndShowVocabulary();
+            }
+        });
+
+        translationBtn.addEventListener('click', () => {
+            translationMode = !translationMode;
+            translationBtn.classList.toggle('active');
+            translationPanel.classList.toggle('show');
+            
+            if (translationMode) {
+                translationText.innerHTML = 'Translation demo: Click on vocabulary words to search on Jisho.org';
+            }
+        });
+
+        readingBtn.addEventListener('click', () => {
+            readingPractice = !readingPractice;
+            readingBtn.classList.toggle('active');
+            updateDisplay();
+        });
+
+        notesBtn.addEventListener('click', () => {
+            notesPanel.classList.toggle('show');
+            notesBtn.classList.toggle('active');
+            
+            // Load saved notes if any
+            if (notesPanel.classList.contains('show') && subtitles.length > 0) {
+                const savedNote = localStorage.getItem(`note_${currentFileName}_${currentIndex}`);
+                if (savedNote) {
+                    notesText.value = savedNote;
+                } else {
+                    notesText.value = '';
+                }
+            }
+        });
+
+        saveNotesBtn.addEventListener('click', () => {
+            if (subtitles.length > 0) {
+                const note = notesText.value;
+                localStorage.setItem(`note_${currentFileName}_${currentIndex}`, note);
+                showMessage('Notes saved!', 'success');
+            }
+        });
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (subtitles.length === 0) return;
+            
+            if (e.key === 'ArrowLeft') {
+                currentIndex = (currentIndex - 1 + subtitles.length) % subtitles.length;
+                updateDisplay();
+            } else if (e.key === 'ArrowRight') {
+                currentIndex = (currentIndex + 1) % subtitles.length;
+                updateDisplay();
+            }
+        });
+
+        // File drag and drop
+        document.addEventListener('dragover', (e) => {
+            e.preventDefault();
+        });
+
+        document.addEventListener('drop', (e) => {
+            e.preventDefault();
+            
+            const file = e.dataTransfer.files[0];
+            if (file && file.name.match(/\.(srt|vtt|ass|txt|sub)$/i)) {
+                subtitleFile.files = e.dataTransfer.files;
+                subtitleFile.dispatchEvent(new Event('change'));
+            } else {
+                showMessage('Please drop a valid subtitle file', 'error');
+            }
+        });
+
+        // Initialize
+        loadSavedSubtitles();
+    </script>
+</body>
+</html>
